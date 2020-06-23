@@ -6,74 +6,56 @@ import requests
 from bs4 import BeautifulSoup
 from prometheus_client import start_http_server, Gauge, Counter
 
+logging.basicConfig(level=logging.INFO)
+
 total_scrapes = Counter(
     'netgear_total_scrapes',
     'Total number of times the modem has been scraped'
 )
 total_failed_scrapes = Counter(
     'netgear_total_failed_scrapes',
-    'Total number of times modem scrapes have failed'
+    'Total number of times modem scrapes have failed',
+    ['http_response_code']
 )
 generic_failures = Counter(
     'netgear_generic_failures',
     'Total number of generic failures'
 )
-ds_bonded = {
-    'locked': {},
-    'freq': {},
-    'power': {},
-    'snrmer': {},
-    'uecodewords': {},
-    'cocodewords': {},
-    'uccodewords': {}
-}
-us_bonded = {
-    'locked': {},
-    'freq': {},
-    'power': {}
-}
-ds_ofdm = {
-    'locked': {},
-    'freq': {},
-    'power': {},
-    'snrmer': {},
-    'uecodewords': {},
-    'cocodewords': {},
-    'uccodewords': {}
-}
-us_ofdma = {
-    'locked': {},
-    'freq': {},
-    'power': {}
-}
-for _key in range(1, 33):
-    key = str(_key)
-    ds_bonded['locked'][key] = Gauge(f'netgear_bonded_downstream_{key}_locked', f'Downstream bonded channel {key} is locked(1) or not (0)', ['channel'])
-    ds_bonded['freq'][key] = Gauge(f'netgear_bonded_downstream_{key}_frequency_hz', f'Downstream bonded frequency for channel {key}', ['channel'])
-    ds_bonded['power'][key] = Gauge(f'netgear_bonded_downstream_{key}_power_dbmv', f'Downstream bonded power for channel {key}', ['channel'])
-    ds_bonded['snrmer'][key] = Gauge(f'netgear_bonded_downstream_{key}_snr_mer_db', f'Downstream bonded SNR/MER for channel {key}', ['channel'])
-    ds_bonded['uecodewords'][key] = Gauge(f'netgear_bonded_downstream_{key}_unerrored_codewords', f'Downstream bonded unerrored codewords for channel {key}', ['channel'])
-    ds_bonded['cocodewords'][key] = Gauge(f'netgear_bonded_downstream_{key}_correctable_codewords', f'Downstream bonded correctable codewords for channel {key}', ['channel'])
-    ds_bonded['uccodewords'][key] = Gauge(f'netgear_bonded_downstream_{key}_uncorrectable_codewords', f'Downstream bonded uncorrectable codewords for channel {key}', ['channel'])
-for _key in range(1, 9):
-    key = str(_key)
-    us_bonded['locked'][key] = Gauge(f'netgear_bonded_upstream_{key}_locked', f'Upstream bonded channel {key} is locked(1) or not (0)', ['channel'])
-    us_bonded['freq'][key] = Gauge(f'netgear_bonded_upstream_{key}_frequency_hz', f'Upstream bonded frequency for channel {key}', ['channel'])
-    us_bonded['power'][key] = Gauge(f'netgear_bonded_upstream_{key}_power_dbmv', f'Upstream bonded power for channel {key}', ['channel'])
-for _key in range(1, 3):
-    key = str(_key)
-    ds_ofdm['locked'][key] = Gauge(f'netgear_ofdm_downstream_{key}_locked', f'Downstream ofdm channel {key} is locked(1) or not (0)', ['channel'])
-    ds_ofdm['freq'][key] = Gauge(f'netgear_ofdm_downstream_{key}_frequency_hz', f'Downstream ofdm frequency for channel {key}', ['channel'])
-    ds_ofdm['power'][key] = Gauge(f'netgear_ofdm_downstream_{key}_power_dbmv', f'Downstream ofdm power for channel {key}', ['channel'])
-    ds_ofdm['snrmer'][key] = Gauge(f'netgear_ofdm_downstream_{key}_snr_mer_db', f'Downstream ofdm SNR/MER for channel {key}', ['channel'])
-    ds_ofdm['uecodewords'][key] = Gauge(f'netgear_ofdm_downstream_{key}_unerrored_codewords', f'Downstream ofdm unerrored codewords for channel {key}', ['channel'])
-    ds_ofdm['cocodewords'][key] = Gauge(f'netgear_ofdm_downstream_{key}_correctable_codewords', f'Downstream ofdm correctable codewords for channel {key}', ['channel'])
-    ds_ofdm['uccodewords'][key] = Gauge(f'netgear_ofdm_downstream_{key}_uncorrectable_codewords', f'Downstream ofdm uncorrectable codewords for channel {key}', ['channel'])
-for _key in range(1, 3):
-    key = str(_key)
-    us_ofdma['locked'][key] = Gauge(f'netgear_ofdma_upstream_{key}_locked', f'Upstream OFDMA channel {key} is locked(1) or not (0)', ['channel'])
-    us_ofdma['freq'][key] = Gauge(f'netgear_ofdma_upstream_{key}_frequency_hz', f'Upstream OFDMA frequency for channel {key}', ['channel'])
-    us_ofdma['power'][key] = Gauge(f'netgear_ofdma_upstream_{key}_power_dbmv', f'Upstream OFDMA power for channel {key}', ['channel'])
+i_locked = Gauge(
+    'netgear_locked',
+    'Channel is locked(1) or not (0)',
+    ['channel', 'channel_type', 'direction']
+)
+i_freq = Gauge(
+    'netgear_frequency_hz',
+    'Channel frequency',
+    ['channel', 'channel_type', 'direction']
+)
+i_power = Gauge(
+    'netgear_power_dbmv',
+    'Channel power',
+    ['channel', 'channel_type', 'direction']
+)
+i_snrmer = Gauge(
+    'netgear_snr_mer_db',
+    'Channel SNR/MER',
+    ['channel', 'channel_type', 'direction']
+)
+i_ue_codewords = Gauge(
+    'netgear_unerrored_codewords',
+    'Channel unerrored codewords',
+    ['channel', 'channel_type', 'direction']
+)
+i_co_codewords = Gauge(
+    'netgear_correctable_codewords',
+    'Channel correctable codewords',
+    ['channel', 'channel_type', 'direction']
+)
+i_uc_codewords = Gauge(
+    'netgear_uncorrectable_codewords',
+    'Channel uncorrectable codewords',
+    ['channel', 'channel_type', 'direction']
+)
 
 
 def scrape_modem(modem_ip, username, password):
@@ -102,9 +84,17 @@ def scrape_modem(modem_ip, username, password):
         ds_ofdm_table = soup.find('table', id='d31dsTable').find_all('tr')[1:]
         us_ofdma_table = soup.find('table', id='d31usTable').find_all('tr')[1:]
         ds_hash = {}
+        ds_hash['channel_type'] = 'bonded'
+        ds_hash['direction'] = 'downstream'
         us_hash = {}
+        us_hash['channel_type'] = 'bonded'
+        us_hash['direction'] = 'upstream'
         ds_ofdm_hash = {}
+        ds_ofdm_hash['channel_type'] = 'ofdm'
+        ds_ofdm_hash['direction'] = 'downstream'
         us_ofdma_hash = {}
+        us_ofdma_hash['channel_type'] = 'ofdma'
+        us_ofdma_hash['direction'] = 'upstream'
         for each in ds_table:
             ds_hash[each.contents[0].get_text()] = {
                 'lock_status': each.contents[1].get_text(),
@@ -146,6 +136,7 @@ def scrape_modem(modem_ip, username, password):
                 'frequency': each.contents[4].get_text(),
                 'power': each.contents[5].get_text()
             }
+        logging.info('Successfully scraped metrics...')
         return {
             'ds_bonded': ds_hash,
             'us_bonded': us_hash,
@@ -153,40 +144,50 @@ def scrape_modem(modem_ip, username, password):
             'us_ofdma': us_ofdma_hash
         }
     else:
-        total_failed_scrapes.inc()
+        logging.error('HTTP Error: Failed to scrape metrics, check total_failed_scrapes metric...')
+        total_failed_scrapes.labels(
+            http_response_code=status_page.status_code
+        ).inc()
+        raise Exception('HTTP Error: Failed to scrape metrics')
 
 
-def set_locked(lockstatus: str, gauge: Gauge, channel: str):
-    if lockstatus == 'Locked':
-        gauge.labels(channel=channel).set(1)
+def set_locked(channel: str, channel_type: str, direction: str, metrics: dict):
+    if metrics['lock_status'] == 'Locked':
+        i_locked.labels(channel=channel, channel_type=channel_type, direction=direction).set(1)
     else:
-        gauge.labels(channel=channel).set(0)
+        i_locked.labels(channel=channel, channel_type=channel_type, direction=direction).set(0)
 
 
-def set_ds_metrics(metrics: dict, instruments: dict):
+def set_ds_metrics(metrics: dict):
+    channel_type = metrics['channel_type']
+    direction = metrics['direction']
     for key, val in metrics.items():
-        set_locked(val['lock_status'], instruments['locked'][key])
-        instruments['freq'][key].labels(channel=key).set(float(val['frequency'].replace('Hz', '').strip()))
-        instruments['power'][key].labels(channel=key).set(float(val['power'].replace('dBmV', '').strip()))
-        instruments['snrmer'][key].labels(channel=key).set(float(val['snr_mer'].replace('dB', '').strip()))
-        instruments['uecodewords'][key].labels(channel=key).set(float(val['unerrored_codewords']))
-        instruments['cocodewords'][key].labels(channel=key).set(float(val['correctable_codewords']))
-        instruments['uccodewords'][key].labels(channel=key).set(float(val['correctable_codewords']))
+        if key != 'channel_type' and key != 'direction':
+            set_locked(key, channel_type, direction, val)
+            i_freq.labels(channel=key, channel_type=channel_type, direction=direction).set(float(val['frequency'].replace('Hz', '').strip()))
+            i_power.labels(channel=key, channel_type=channel_type, direction=direction).set(float(val['power'].replace('dBmV', '').strip()))
+            i_snrmer.labels(channel=key, channel_type=channel_type, direction=direction).set(float(val['snr_mer'].replace('dB', '').strip()))
+            i_ue_codewords.labels(channel=key, channel_type=channel_type, direction=direction).set(float(val['unerrored_codewords']))
+            i_co_codewords.labels(channel=key, channel_type=channel_type, direction=direction).set(float(val['correctable_codewords']))
+            i_uc_codewords.labels(channel=key, channel_type=channel_type, direction=direction).set(float(val['correctable_codewords']))
 
 
-def set_us_metrics(metrics: dict, instruments: dict):
+def set_us_metrics(metrics: dict):
+    channel_type = metrics['channel_type']
+    direction = metrics['direction']
     for key, val in metrics.items():
-        set_locked(val['lock_status'], instruments['locked'][key], key)
-        instruments['freq'][key].labels(channel=key).set(float(val['frequency'].replace('Hz', '').strip()))
-        instruments['power'][key].labels(channel=key).set(float(val['power'].replace('dBmV', '').strip()))
+        if key != 'channel_type' and key != 'direction':
+            set_locked(key, channel_type, direction, val)
+            i_freq.labels(channel=key, channel_type=channel_type, direction=direction).set(float(val['frequency'].replace('Hz', '').strip()))
+            i_power.labels(channel=key, channel_type=channel_type, direction=direction).set(float(val['power'].replace('dBmV', '').strip()))
 
 
 def export_metrics(modem_ip, username, password, interval):
     metrics = scrape_modem(modem_ip, username, password)
-    set_ds_metrics(metrics['ds_bonded'], ds_bonded)
-    set_ds_metrics(metrics['ds_ofdm'], ds_ofdm)
-    set_us_metrics(metrics['us_bonded'], us_bonded)
-    set_us_metrics(metrics['us_ofdma'], us_ofdma)
+    set_ds_metrics(metrics['ds_bonded'])
+    set_ds_metrics(metrics['ds_ofdm'])
+    set_us_metrics(metrics['us_bonded'])
+    set_us_metrics(metrics['us_ofdma'])
     time.sleep(interval)
 
 
@@ -215,5 +216,6 @@ if __name__ == '__main__':
                            conf['password'],
                            conf.get('interval', 10))
         except Exception as exc:
+            logging.error(exc)
             logging.error(traceback.print_tb(exc.__traceback__))
             generic_failures.inc()
