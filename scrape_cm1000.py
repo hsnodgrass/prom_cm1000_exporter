@@ -185,10 +185,10 @@ if __name__ == '__main__':
     try:
         import os
         conf = {
-            'modem_ip': os.getenv('PCM_MODEM_IP', '192.168.0.1'),
+            'modem_ip': os.getenv('PCM_MODEM_IP', '192.168.100.1'),
             'username': os.getenv('PCM_USERNAME', 'admin'),
             'password': os.environ['PCM_PASSWORD'],
-            'export_port': os.getenv('PCM_EXPORT_PORT', 9527)
+            'export_port': os.getenv('PCM_EXPORT_PORT', 9527),
             'interval': os.getenv('PCM_INTERVAL', 10)
         }
     except KeyError:
