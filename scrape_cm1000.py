@@ -6,9 +6,18 @@ import requests
 from bs4 import BeautifulSoup
 from prometheus_client import start_http_server, Gauge, Counter
 
-total_scrapes = Counter('netgear_total_scrapes', 'Total number of times the modem has been scraped')
-total_failed_scrapes = Counter('netgear_total_failed_scrapes', 'Total number of times modem scrapes have failed')
-generic_failures = Counter('netgear_generic_failures', 'Total number of generic failures')
+total_scrapes = Counter(
+    'netgear_total_scrapes',
+    'Total number of times the modem has been scraped'
+)
+total_failed_scrapes = Counter(
+    'netgear_total_failed_scrapes',
+    'Total number of times modem scrapes have failed'
+)
+generic_failures = Counter(
+    'netgear_generic_failures',
+    'Total number of generic failures'
+)
 ds_bonded = {
     'locked': {},
     'freq': {},
@@ -39,32 +48,33 @@ us_ofdma = {
 }
 for _key in range(1, 33):
     key = str(_key)
-    ds_bonded['locked'][key] = Gauge(f'netgear_bonded_downstream_{key}_locked', f'Downstream bonded channel {key} is locked(1) or not (0)', channel=f'Channel {key}')
-    ds_bonded['freq'][key] = Gauge(f'netgear_bonded_downstream_{key}_frequency_hz', f'Downstream bonded frequency for channel {key}', channel=f'Channel {key}')
-    ds_bonded['power'][key] = Gauge(f'netgear_bonded_downstream_{key}_power_dbmv', f'Downstream bonded power for channel {key}', channel=f'Channel {key}')
-    ds_bonded['snrmer'][key] = Gauge(f'netgear_bonded_downstream_{key}_snr_mer_db', f'Downstream bonded SNR/MER for channel {key}', channel=f'Channel {key}')
-    ds_bonded['uecodewords'][key] = Gauge(f'netgear_bonded_downstream_{key}_unerrored_codewords', f'Downstream bonded unerrored codewords for channel {key}', channel=f'Channel {key}')
-    ds_bonded['cocodewords'][key] = Gauge(f'netgear_bonded_downstream_{key}_correctable_codewords', f'Downstream bonded correctable codewords for channel {key}', channel=f'Channel {key}')
-    ds_bonded['uccodewords'][key] = Gauge(f'netgear_bonded_downstream_{key}_uncorrectable_codewords', f'Downstream bonded uncorrectable codewords for channel {key}', channel=f'Channel {key}')
-for _key in range(1,9):
+    ds_bonded['locked'][key] = Gauge(f'netgear_bonded_downstream_{key}_locked', f'Downstream bonded channel {key} is locked(1) or not (0)', ['channel'])
+    ds_bonded['freq'][key] = Gauge(f'netgear_bonded_downstream_{key}_frequency_hz', f'Downstream bonded frequency for channel {key}', ['channel'])
+    ds_bonded['power'][key] = Gauge(f'netgear_bonded_downstream_{key}_power_dbmv', f'Downstream bonded power for channel {key}', ['channel'])
+    ds_bonded['snrmer'][key] = Gauge(f'netgear_bonded_downstream_{key}_snr_mer_db', f'Downstream bonded SNR/MER for channel {key}', ['channel'])
+    ds_bonded['uecodewords'][key] = Gauge(f'netgear_bonded_downstream_{key}_unerrored_codewords', f'Downstream bonded unerrored codewords for channel {key}', ['channel'])
+    ds_bonded['cocodewords'][key] = Gauge(f'netgear_bonded_downstream_{key}_correctable_codewords', f'Downstream bonded correctable codewords for channel {key}', ['channel'])
+    ds_bonded['uccodewords'][key] = Gauge(f'netgear_bonded_downstream_{key}_uncorrectable_codewords', f'Downstream bonded uncorrectable codewords for channel {key}', ['channel'])
+for _key in range(1, 9):
     key = str(_key)
-    us_bonded['locked'][key] = Gauge(f'netgear_bonded_upstream_{key}_locked', f'Upstream bonded channel {key} is locked(1) or not (0)', channel=f'Channel {key}')
-    us_bonded['freq'][key] = Gauge(f'netgear_bonded_upstream_{key}_frequency_hz', f'Upstream bonded frequency for channel {key}', channel=f'Channel {key}')
-    us_bonded['power'][key] = Gauge(f'netgear_bonded_upstream_{key}_power_dbmv', f'Upstream bonded power for channel {key}', channel=f'Channel {key}')
-for _key in range(1,3):
+    us_bonded['locked'][key] = Gauge(f'netgear_bonded_upstream_{key}_locked', f'Upstream bonded channel {key} is locked(1) or not (0)', ['channel'])
+    us_bonded['freq'][key] = Gauge(f'netgear_bonded_upstream_{key}_frequency_hz', f'Upstream bonded frequency for channel {key}', ['channel'])
+    us_bonded['power'][key] = Gauge(f'netgear_bonded_upstream_{key}_power_dbmv', f'Upstream bonded power for channel {key}', ['channel'])
+for _key in range(1, 3):
     key = str(_key)
-    ds_ofdm['locked'][key] = Gauge(f'netgear_ofdm_downstream_{key}_locked', f'Downstream ofdm channel {key} is locked(1) or not (0)', channel=f'Channel {key}')
-    ds_ofdm['freq'][key] = Gauge(f'netgear_ofdm_downstream_{key}_frequency_hz', f'Downstream ofdm frequency for channel {key}', channel=f'Channel {key}')
-    ds_ofdm['power'][key] = Gauge(f'netgear_ofdm_downstream_{key}_power_dbmv', f'Downstream ofdm power for channel {key}', channel=f'Channel {key}')
-    ds_ofdm['snrmer'][key] = Gauge(f'netgear_ofdm_downstream_{key}_snr_mer_db', f'Downstream ofdm SNR/MER for channel {key}', channel=f'Channel {key}')
-    ds_ofdm['uecodewords'][key] = Gauge(f'netgear_ofdm_downstream_{key}_unerrored_codewords', f'Downstream ofdm unerrored codewords for channel {key}', channel=f'Channel {key}')
-    ds_ofdm['cocodewords'][key] = Gauge(f'netgear_ofdm_downstream_{key}_correctable_codewords', f'Downstream ofdm correctable codewords for channel {key}', channel=f'Channel {key}')
-    ds_ofdm['uccodewords'][key] = Gauge(f'netgear_ofdm_downstream_{key}_uncorrectable_codewords', f'Downstream ofdm uncorrectable codewords for channel {key}', channel=f'Channel {key}')
-for _key in range(1,3):
+    ds_ofdm['locked'][key] = Gauge(f'netgear_ofdm_downstream_{key}_locked', f'Downstream ofdm channel {key} is locked(1) or not (0)', ['channel'])
+    ds_ofdm['freq'][key] = Gauge(f'netgear_ofdm_downstream_{key}_frequency_hz', f'Downstream ofdm frequency for channel {key}', ['channel'])
+    ds_ofdm['power'][key] = Gauge(f'netgear_ofdm_downstream_{key}_power_dbmv', f'Downstream ofdm power for channel {key}', ['channel'])
+    ds_ofdm['snrmer'][key] = Gauge(f'netgear_ofdm_downstream_{key}_snr_mer_db', f'Downstream ofdm SNR/MER for channel {key}', ['channel'])
+    ds_ofdm['uecodewords'][key] = Gauge(f'netgear_ofdm_downstream_{key}_unerrored_codewords', f'Downstream ofdm unerrored codewords for channel {key}', ['channel'])
+    ds_ofdm['cocodewords'][key] = Gauge(f'netgear_ofdm_downstream_{key}_correctable_codewords', f'Downstream ofdm correctable codewords for channel {key}', ['channel'])
+    ds_ofdm['uccodewords'][key] = Gauge(f'netgear_ofdm_downstream_{key}_uncorrectable_codewords', f'Downstream ofdm uncorrectable codewords for channel {key}', ['channel'])
+for _key in range(1, 3):
     key = str(_key)
-    us_ofdma['locked'][key] = Gauge(f'netgear_ofdma_upstream_{key}_locked', f'Upstream OFDMA channel {key} is locked(1) or not (0)', channel=f'Channel {key}')
-    us_ofdma['freq'][key] = Gauge(f'netgear_ofdma_upstream_{key}_frequency_hz', f'Upstream OFDMA frequency for channel {key}', channel=f'Channel {key}')
-    us_ofdma['power'][key] = Gauge(f'netgear_ofdma_upstream_{key}_power_dbmv', f'Upstream OFDMA power for channel {key}', channel=f'Channel {key}')
+    us_ofdma['locked'][key] = Gauge(f'netgear_ofdma_upstream_{key}_locked', f'Upstream OFDMA channel {key} is locked(1) or not (0)', ['channel'])
+    us_ofdma['freq'][key] = Gauge(f'netgear_ofdma_upstream_{key}_frequency_hz', f'Upstream OFDMA frequency for channel {key}', ['channel'])
+    us_ofdma['power'][key] = Gauge(f'netgear_ofdma_upstream_{key}_power_dbmv', f'Upstream OFDMA power for channel {key}', ['channel'])
+
 
 def scrape_modem(modem_ip, username, password):
     # Authenticate and get the status page
@@ -146,29 +156,29 @@ def scrape_modem(modem_ip, username, password):
         total_failed_scrapes.inc()
 
 
-def set_locked(lockstatus: str, gauge: Gauge):
+def set_locked(lockstatus: str, gauge: Gauge, channel: str):
     if lockstatus == 'Locked':
-        gauge.set(1)
+        gauge.labels(channel=channel).set(1)
     else:
-        gauge.set(0)
+        gauge.labels(channel=channel).set(0)
 
 
 def set_ds_metrics(metrics: dict, instruments: dict):
     for key, val in metrics.items():
         set_locked(val['lock_status'], instruments['locked'][key])
-        instruments['freq'][key].set(float(val['frequency'].replace('Hz', '').strip()))
-        instruments['power'][key].set(float(val['power'].replace('dBmV', '').strip()))
-        instruments['snrmer'][key].set(float(val['snr_mer'].replace('dB', '').strip()))
-        instruments['uecodewords'][key].set(float(val['unerrored_codewords']))
-        instruments['cocodewords'][key].set(float(val['correctable_codewords']))
-        instruments['uccodewords'][key].set(float(val['correctable_codewords']))
+        instruments['freq'][key].labels(channel=key).set(float(val['frequency'].replace('Hz', '').strip()))
+        instruments['power'][key].labels(channel=key).set(float(val['power'].replace('dBmV', '').strip()))
+        instruments['snrmer'][key].labels(channel=key).set(float(val['snr_mer'].replace('dB', '').strip()))
+        instruments['uecodewords'][key].labels(channel=key).set(float(val['unerrored_codewords']))
+        instruments['cocodewords'][key].labels(channel=key).set(float(val['correctable_codewords']))
+        instruments['uccodewords'][key].labels(channel=key).set(float(val['correctable_codewords']))
 
 
 def set_us_metrics(metrics: dict, instruments: dict):
     for key, val in metrics.items():
-        set_locked(val['lock_status'], instruments['locked'][key])
-        instruments['freq'][key].set(float(val['frequency'].replace('Hz', '').strip()))
-        instruments['power'][key].set(float(val['power'].replace('dBmV', '').strip()))
+        set_locked(val['lock_status'], instruments['locked'][key], key)
+        instruments['freq'][key].labels(channel=key).set(float(val['frequency'].replace('Hz', '').strip()))
+        instruments['power'][key].labels(channel=key).set(float(val['power'].replace('dBmV', '').strip()))
 
 
 def export_metrics(modem_ip, username, password, interval):
@@ -200,7 +210,10 @@ if __name__ == '__main__':
     start_http_server(int(conf.get('export_port', 9527)))
     while True:
         try:
-            export_metrics(conf.get('modem_ip', '192.168.100.1'), conf.get('username', 'admin'), conf['password'], conf.get('interval', 10))
+            export_metrics(conf.get('modem_ip', '192.168.100.1'),
+                           conf.get('username', 'admin'),
+                           conf['password'],
+                           conf.get('interval', 10))
         except Exception as exc:
             logging.error(traceback.print_tb(exc.__traceback__))
             generic_failures.inc()
