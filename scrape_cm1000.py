@@ -1,5 +1,6 @@
 import logging
 import time
+import traceback
 import urllib.parse
 import requests
 from bs4 import BeautifulSoup
@@ -38,32 +39,32 @@ us_ofdma = {
 }
 for _key in range(1, 33):
     key = str(_key)
-    ds_bonded['locked'][key] = Gauge(f'netgear_bonded_downstream_{key}_locked', f'Downstream bonded channel {key} is locked(1) or not (0)')
-    ds_bonded['freq'][key] = Gauge(f'netgear_bonded_downstream_{key}_frequency_hz', f'Downstream bonded frequency for channel {key}')
-    ds_bonded['power'][key] = Gauge(f'netgear_bonded_downstream_{key}_power_dbmv', f'Downstream bonded power for channel {key}')
-    ds_bonded['snrmer'][key] = Gauge(f'netgear_bonded_downstream_{key}_snr_mer_db', f'Downstream bonded SNR/MER for channel {key}')
-    ds_bonded['uecodewords'][key] = Gauge(f'netgear_bonded_downstream_{key}_unerrored_codewords', f'Downstream bonded unerrored codewords for channel {key}')
-    ds_bonded['cocodewords'][key] = Gauge(f'netgear_bonded_downstream_{key}_correctable_codewords', f'Downstream bonded correctable codewords for channel {key}')
-    ds_bonded['uccodewords'][key] = Gauge(f'netgear_bonded_downstream_{key}_uncorrectable_codewords', f'Downstream bonded uncorrectable codewords for channel {key}')
+    ds_bonded['locked'][key] = Gauge(f'netgear_bonded_downstream_{key}_locked', f'Downstream bonded channel {key} is locked(1) or not (0)', channel=f'Channel {key}')
+    ds_bonded['freq'][key] = Gauge(f'netgear_bonded_downstream_{key}_frequency_hz', f'Downstream bonded frequency for channel {key}', channel=f'Channel {key}')
+    ds_bonded['power'][key] = Gauge(f'netgear_bonded_downstream_{key}_power_dbmv', f'Downstream bonded power for channel {key}', channel=f'Channel {key}')
+    ds_bonded['snrmer'][key] = Gauge(f'netgear_bonded_downstream_{key}_snr_mer_db', f'Downstream bonded SNR/MER for channel {key}', channel=f'Channel {key}')
+    ds_bonded['uecodewords'][key] = Gauge(f'netgear_bonded_downstream_{key}_unerrored_codewords', f'Downstream bonded unerrored codewords for channel {key}', channel=f'Channel {key}')
+    ds_bonded['cocodewords'][key] = Gauge(f'netgear_bonded_downstream_{key}_correctable_codewords', f'Downstream bonded correctable codewords for channel {key}', channel=f'Channel {key}')
+    ds_bonded['uccodewords'][key] = Gauge(f'netgear_bonded_downstream_{key}_uncorrectable_codewords', f'Downstream bonded uncorrectable codewords for channel {key}', channel=f'Channel {key}')
 for _key in range(1,9):
     key = str(_key)
-    us_bonded['locked'][key] = Gauge(f'netgear_bonded_upstream_{key}_locked', f'Upstream bonded channel {key} is locked(1) or not (0)')
-    us_bonded['freq'][key] = Gauge(f'netgear_bonded_upstream_{key}_frequency_hz', f'Upstream bonded frequency for channel {key}')
-    us_bonded['power'][key] = Gauge(f'netgear_bonded_upstream_{key}_power_dbmv', f'Upstream bonded power for channel {key}')
+    us_bonded['locked'][key] = Gauge(f'netgear_bonded_upstream_{key}_locked', f'Upstream bonded channel {key} is locked(1) or not (0)', channel=f'Channel {key}')
+    us_bonded['freq'][key] = Gauge(f'netgear_bonded_upstream_{key}_frequency_hz', f'Upstream bonded frequency for channel {key}', channel=f'Channel {key}')
+    us_bonded['power'][key] = Gauge(f'netgear_bonded_upstream_{key}_power_dbmv', f'Upstream bonded power for channel {key}', channel=f'Channel {key}')
 for _key in range(1,3):
     key = str(_key)
-    ds_ofdm['locked'][key] = Gauge(f'netgear_ofdm_downstream_{key}_locked', f'Downstream ofdm channel {key} is locked(1) or not (0)')
-    ds_ofdm['freq'][key] = Gauge(f'netgear_ofdm_downstream_{key}_frequency_hz', f'Downstream ofdm frequency for channel {key}')
-    ds_ofdm['power'][key] = Gauge(f'netgear_ofdm_downstream_{key}_power_dbmv', f'Downstream ofdm power for channel {key}')
-    ds_ofdm['snrmer'][key] = Gauge(f'netgear_ofdm_downstream_{key}_snr_mer_db', f'Downstream ofdm SNR/MER for channel {key}')
-    ds_ofdm['uecodewords'][key] = Gauge(f'netgear_ofdm_downstream_{key}_unerrored_codewords', f'Downstream ofdm unerrored codewords for channel {key}')
-    ds_ofdm['cocodewords'][key] = Gauge(f'netgear_ofdm_downstream_{key}_correctable_codewords', f'Downstream ofdm correctable codewords for channel {key}')
-    ds_ofdm['uccodewords'][key] = Gauge(f'netgear_ofdm_downstream_{key}_uncorrectable_codewords', f'Downstream ofdm uncorrectable codewords for channel {key}')
+    ds_ofdm['locked'][key] = Gauge(f'netgear_ofdm_downstream_{key}_locked', f'Downstream ofdm channel {key} is locked(1) or not (0)', channel=f'Channel {key}')
+    ds_ofdm['freq'][key] = Gauge(f'netgear_ofdm_downstream_{key}_frequency_hz', f'Downstream ofdm frequency for channel {key}', channel=f'Channel {key}')
+    ds_ofdm['power'][key] = Gauge(f'netgear_ofdm_downstream_{key}_power_dbmv', f'Downstream ofdm power for channel {key}', channel=f'Channel {key}')
+    ds_ofdm['snrmer'][key] = Gauge(f'netgear_ofdm_downstream_{key}_snr_mer_db', f'Downstream ofdm SNR/MER for channel {key}', channel=f'Channel {key}')
+    ds_ofdm['uecodewords'][key] = Gauge(f'netgear_ofdm_downstream_{key}_unerrored_codewords', f'Downstream ofdm unerrored codewords for channel {key}', channel=f'Channel {key}')
+    ds_ofdm['cocodewords'][key] = Gauge(f'netgear_ofdm_downstream_{key}_correctable_codewords', f'Downstream ofdm correctable codewords for channel {key}', channel=f'Channel {key}')
+    ds_ofdm['uccodewords'][key] = Gauge(f'netgear_ofdm_downstream_{key}_uncorrectable_codewords', f'Downstream ofdm uncorrectable codewords for channel {key}', channel=f'Channel {key}')
 for _key in range(1,3):
     key = str(_key)
-    us_ofdma['locked'][key] = Gauge(f'netgear_ofdma_upstream_{key}_locked', f'Upstream OFDMA channel {key} is locked(1) or not (0)')
-    us_ofdma['freq'][key] = Gauge(f'netgear_ofdma_upstream_{key}_frequency_hz', f'Upstream OFDMA frequency for channel {key}')
-    us_ofdma['power'][key] = Gauge(f'netgear_ofdma_upstream_{key}_power_dbmv', f'Upstream OFDMA power for channel {key}')
+    us_ofdma['locked'][key] = Gauge(f'netgear_ofdma_upstream_{key}_locked', f'Upstream OFDMA channel {key} is locked(1) or not (0)', channel=f'Channel {key}')
+    us_ofdma['freq'][key] = Gauge(f'netgear_ofdma_upstream_{key}_frequency_hz', f'Upstream OFDMA frequency for channel {key}', channel=f'Channel {key}')
+    us_ofdma['power'][key] = Gauge(f'netgear_ofdma_upstream_{key}_power_dbmv', f'Upstream OFDMA power for channel {key}', channel=f'Channel {key}')
 
 def scrape_modem(modem_ip, username, password):
     # Authenticate and get the status page
@@ -201,5 +202,5 @@ if __name__ == '__main__':
         try:
             export_metrics(conf.get('modem_ip', '192.168.100.1'), conf.get('username', 'admin'), conf['password'], conf.get('interval', 10))
         except Exception as exc:
-            logging.error(exc.with_traceback())
+            logging.error(traceback.print_tb(exc.__traceback__))
             generic_failures.inc()
