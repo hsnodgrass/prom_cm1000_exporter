@@ -214,7 +214,7 @@ if __name__ == '__main__':
             export_metrics(conf.get('modem_ip', '192.168.100.1'),
                            conf.get('username', 'admin'),
                            conf['password'],
-                           conf.get('interval', 10))
+                           int(conf.get('interval', 10)))
         except Exception as exc:
             logging.error(exc)
             logging.error(traceback.print_tb(exc.__traceback__))
