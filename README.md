@@ -8,15 +8,15 @@ There are two ways to configure the exporter: environment variables or a `yaml` 
 
 ## Environment variables
 
-* `PCM_MODEM_IP` - This envvar should be set to the IP of your modem. Default: `192.168.100.1`.
-* `PCM_USERNAME` - The username to login to your modem. Default: `admin`.
-* `PCM_PASSWORD` - The password to log into your modem. REQUIRED.
-* `PCM_EXPORT_PORT` - The TCP port the exporter runs on. Default: `9527`.
-* `PCM_INTERVAL` - The interval, in seconds, between scrapes. Default: `10`.
+* `PCM_modem_ip` - This envvar should be set to the IP of your modem. Default: `192.168.100.1`.
+* `PCM_username` - The username to login to your modem. Default: `admin`.
+* `PCM_password` - The password to log into your modem. REQUIRED.
+* `PPE_export_port` - The TCP port the exporter runs on. Default: `9527`.
+* `PPE_interval` - The interval, in seconds, between scrapes. Default: `10`.
 
 ## Running the container with envvars
 
-`docker run -p 9527:9527 -e PCM_MODEM_IP='192.168.100.1' -e PCM_USERNAME='admin' -e PCM_PASSWORD='hunter2' -e PCM_EXPORT_PORT=9527 -e PCM_INTERVAL=10 hsnodgrass3/prom_cm1000_exporter`
+`docker run -p 9527:9527 -e PCM_modem_ip='192.168.100.1' -e PCM_username='admin' -e PCM_password='hunter2' -e PPE_export_port=9527 -e PPE_interval=10 hsnodgrass3/prom_cm1000_exporter`
 
 ## YAML
 
