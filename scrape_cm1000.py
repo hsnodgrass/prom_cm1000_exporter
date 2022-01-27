@@ -241,7 +241,7 @@ def set_ds_metrics(metrics: dict):
                 channel=key,
                 channel_type=channel_type,
                 direction=direction
-            ).set(float(val['correctable_codewords']))
+            ).set(float(val['uncorrectable_codewords']))
 
 
 def set_us_metrics(metrics: dict):
